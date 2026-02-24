@@ -17,29 +17,21 @@ export default function Dashboard() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [filteredLeads, setFilteredLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<'all' | 'hot' | 'warm' | 'cold'>('all');
 
   const applyFilters = useCallback(() => {
     let filtered = leads;
 
-    // Filter by status
-    if (statusFilter && statusFilter !== 'all') {
-      filtered = filtered.filter((lead) => lead.status === statusFilter);
-    }
-
-    // Filter by search term (company name or contact name)
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (lead) =>
-          lead.company.toLowerCase().includes(term) ||
-          lead.contact_name.toLowerCase().includes(term)
-      );
+    if (activeFilter === 'hot') {
+      filtered = filtered.filter((lead) => lead.lead_score >= 50);
+    } else if (activeFilter === 'warm') {
+      filtered = filtered.filter((lead) => lead.lead_score >= 20 && lead.lead_score < 50);
+    } else if (activeFilter === 'cold') {
+      filtered = filtered.filter((lead) => lead.lead_score < 20);
     }
 
     setFilteredLeads(filtered);
-  }, [leads, searchTerm, statusFilter]);
+  }, [leads, activeFilter]);
 
   useEffect(() => {
     fetchLeads();
@@ -67,93 +59,82 @@ export default function Dashboard() {
   }
 
   // Calculate stats
-  const stats = {
-    total: leads.length,
-    pending: leads.filter((l) => l.status === 'pending').length,
-    complete: leads.filter((l) => l.status === 'complete').length,
-    invalid: leads.filter((l) => l.status === 'invalid').length,
-  };
-
-  const statusOptions = [
-    { id: 'all', label: 'All Leads' },
-    { id: 'pending', label: 'Pending' },
-    { id: 'validating', label: 'Validating' },
-    { id: 'researching', label: 'Researching' },
-    { id: 'complete', label: 'Complete' },
-    { id: 'invalid', label: 'Invalid' },
-  ];
+  const hotLeads = leads.filter((l) => l.lead_score >= 50).length;
+  const avgScore = leads.length > 0 ? Math.round(leads.reduce((sum, l) => sum + l.lead_score, 0) / leads.length) : 0;
+  const sourcesCount = new Set(leads.map((l) => l.lead_source)).size;
 
   return (
     <div className="min-h-screen bg-sb-bg">
       <Navbar />
 
-      <main className="pt-24 pb-12">
+      <main className="pt-16 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Stats Bar */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-sb-card border border-sb-border rounded-lg p-6">
-              <p className="text-sb-text-secondary text-sm font-medium">
+          {/* Header */}
+          <div className="mb-12">
+            <h1 className="text-3xl font-bold text-sb-text mb-2">Lead Intelligence</h1>
+            <p className="text-sb-text-secondary mb-4">AI-powered lead scoring and research</p>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-sb-orange to-sb-orange-light text-white rounded-full text-xs font-semibold">
+              <span>⚡</span>
+              Powered by SB Research
+            </div>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
+            <div className="bg-sb-card rounded-xl shadow-card p-6">
+              <p className="text-xs font-semibold text-sb-text-secondary uppercase tracking-wide mb-2">
                 Total Leads
               </p>
-              <p className="text-3xl font-bold text-sb-text mt-2">
-                {stats.total}
+              <p className="text-[28px] font-bold text-sb-text">
+                {leads.length}
               </p>
             </div>
-            <div className="bg-sb-card border border-sb-border rounded-lg p-6">
-              <p className="text-sb-text-secondary text-sm font-medium">
-                Pending
+            <div className="bg-sb-card rounded-xl shadow-card p-6">
+              <p className="text-xs font-semibold text-sb-text-secondary uppercase tracking-wide mb-2">
+                Hot Leads (50+)
               </p>
-              <p className="text-3xl font-bold text-sb-orange mt-2">
-                {stats.pending}
-              </p>
-            </div>
-            <div className="bg-sb-card border border-sb-border rounded-lg p-6">
-              <p className="text-sb-text-secondary text-sm font-medium">
-                Complete
-              </p>
-              <p className="text-3xl font-bold text-sb-success mt-2">
-                {stats.complete}
+              <p className="text-[28px] font-bold text-sb-success">
+                {hotLeads}
               </p>
             </div>
-            <div className="bg-sb-card border border-sb-border rounded-lg p-6">
-              <p className="text-sb-text-secondary text-sm font-medium">
-                Invalid
+            <div className="bg-sb-card rounded-xl shadow-card p-6">
+              <p className="text-xs font-semibold text-sb-text-secondary uppercase tracking-wide mb-2">
+                Avg Score
               </p>
-              <p className="text-3xl font-bold text-sb-error mt-2">
-                {stats.invalid}
+              <p className="text-[28px] font-bold text-sb-orange">
+                {avgScore}
+              </p>
+            </div>
+            <div className="bg-sb-card rounded-xl shadow-card p-6">
+              <p className="text-xs font-semibold text-sb-text-secondary uppercase tracking-wide mb-2">
+                Sources
+              </p>
+              <p className="text-[28px] font-bold text-sb-text">
+                {sourcesCount}
               </p>
             </div>
           </div>
 
-          {/* Search and Filter Bar */}
-          <div className="mb-8 space-y-4">
-            <input
-              type="text"
-              placeholder="Search by company or contact name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-3 bg-sb-card border border-sb-border rounded-lg text-sb-text placeholder-sb-text-secondary focus:outline-none focus:border-sb-orange transition"
-            />
-
-            <div className="flex flex-wrap gap-2">
-              {statusOptions.map((option) => (
-                <button
-                  key={option.id}
-                  onClick={() =>
-                    setStatusFilter(
-                      statusFilter === option.id ? null : option.id
-                    )
-                  }
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    statusFilter === option.id
-                      ? 'bg-sb-orange text-sb-bg'
-                      : 'bg-sb-card border border-sb-border text-sb-text hover:border-sb-orange'
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+          {/* Filter Buttons */}
+          <div className="mb-8 flex gap-3">
+            {[
+              { id: 'all', label: 'All Leads' },
+              { id: 'hot', label: 'Hot 50+' },
+              { id: 'warm', label: 'Warm 20-49' },
+              { id: 'cold', label: 'Cold <20' },
+            ].map((filter) => (
+              <button
+                key={filter.id}
+                onClick={() => setActiveFilter(filter.id as 'all' | 'hot' | 'warm' | 'cold')}
+                className={`px-4 py-2 rounded-full font-medium text-sm transition ${
+                  activeFilter === filter.id
+                    ? 'bg-sb-text text-white'
+                    : 'bg-sb-card border border-sb-border text-sb-text-secondary hover:border-sb-orange'
+                }`}
+              >
+                {filter.label}
+              </button>
+            ))}
           </div>
 
           {/* Leads Grid */}
@@ -164,13 +145,11 @@ export default function Dashboard() {
           ) : filteredLeads.length === 0 ? (
             <div className="flex items-center justify-center py-12">
               <p className="text-sb-text-secondary text-center">
-                {searchTerm || statusFilter
-                  ? 'No leads match your filters'
-                  : 'No leads yet. Waiting for Slack messages...'}
+                {activeFilter !== 'all' ? 'No leads match this filter' : 'No leads yet. Waiting for data...'}
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredLeads.map((lead) => (
                 <LeadCard key={lead.id} lead={lead} />
               ))}

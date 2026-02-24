@@ -53,7 +53,7 @@ export default function RobotRecommendation({ report }: RobotRecommendationProps
   const confidence = report.recommendation_confidence || 75;
 
   return (
-    <div className="card sticky top-8">
+    <div className="bg-sb-card rounded-xl shadow-card p-6 sticky top-20" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
       <div className="mb-6">
         <p className="text-xs text-sb-text-secondary uppercase tracking-wide mb-3">
           <Bot size={14} className="inline mr-2" />

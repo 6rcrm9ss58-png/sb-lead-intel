@@ -20,7 +20,7 @@ interface CompanyHeaderProps {
 
 export default function CompanyHeader({ lead, report }: CompanyHeaderProps) {
   return (
-    <div className="bg-sb-card border border-sb-border rounded-lg p-8 mb-8">
+    <div className="bg-sb-card rounded-xl shadow-card p-8 mb-8" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
       {/* Header Row */}
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         {/* Left: Company Info */}
@@ -139,7 +139,7 @@ export default function CompanyHeader({ lead, report }: CompanyHeaderProps) {
 
         {/* Right: Opportunity Score */}
         {report && report.opportunity_score !== null && report.opportunity_score !== undefined && (
-          <div className="flex flex-col items-center justify-center bg-sb-bg border border-sb-orange/30 rounded-lg p-8 min-w-48">
+          <div className="flex flex-col items-center justify-center bg-sb-bg border border-sb-border rounded-xl p-8 min-w-48">
             <p className="text-xs text-sb-text-secondary uppercase tracking-wide mb-3">
               <TrendingUp size={14} className="inline mr-2" />
               Opportunity Score

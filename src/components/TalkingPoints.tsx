@@ -72,7 +72,7 @@ export default function TalkingPoints({ report }: TalkingPointsProps) {
     <div className="space-y-8">
       {/* Talking Points */}
       {talkingPoints.length > 0 && (
-        <div className="card">
+        <div className="bg-sb-card rounded-xl shadow-card p-6" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           <h2 className="text-2xl font-bold text-sb-orange mb-6 flex items-center gap-3">
             <MessageCircle size={28} />
             Talking Points
@@ -113,7 +113,7 @@ export default function TalkingPoints({ report }: TalkingPointsProps) {
 
       {/* ROI Angles */}
       {roiAngles.length > 0 && (
-        <div className="card">
+        <div className="bg-sb-card rounded-xl shadow-card p-6" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           <h2 className="text-2xl font-bold text-sb-orange mb-6 flex items-center gap-3">
             <DollarSign size={28} />
             ROI Angles
@@ -138,7 +138,7 @@ export default function TalkingPoints({ report }: TalkingPointsProps) {
 
       {/* Risk Factors */}
       {riskFactors.length > 0 && (
-        <div className="card border border-sb-error/30">
+        <div className="bg-sb-card rounded-xl shadow-card p-6 border border-sb-error/30" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           <h2 className="text-2xl font-bold text-sb-error mb-6 flex items-center gap-3">
             <AlertTriangle size={28} />
             Risk Factors to Address

@@ -9,111 +9,100 @@ interface LeadCardProps {
   report?: Report;
 }
 
-function getScoreBadgeColor(score: number) {
-  if (score >= 50) return 'bg-sb-success';
-  if (score >= 20) return 'bg-sb-orange';
-  return 'bg-sb-error';
+function getScoreRingColor(score: number) {
+  if (score >= 50) return 'border-sb-success';
+  if (score >= 20) return 'border-sb-orange';
+  return 'border-sb-error';
 }
 
-function getStatusBadgeColor(status: string) {
-  switch (status) {
-    case 'pending':
-      return 'bg-sb-warning text-sb-bg';
-    case 'validating':
-      return 'bg-sb-orange text-sb-bg';
-    case 'researching':
-      return 'bg-sb-orange text-sb-bg';
-    case 'complete':
-      return 'bg-sb-success text-sb-bg';
-    case 'invalid':
-      return 'bg-sb-error text-sb-bg';
-    default:
-      return 'bg-sb-card border border-sb-border text-sb-text';
-  }
+function getTemperaturePillColor(score: number) {
+  if (score >= 50) return 'bg-sb-success/10 text-sb-success border-sb-success/30';
+  if (score >= 20) return 'bg-sb-orange/10 text-sb-orange border-sb-orange/30';
+  return 'bg-sb-error/10 text-sb-error border-sb-error/30';
 }
 
-function getRelativeTime(dateString: string) {
-  const now = new Date();
-  const then = new Date(dateString);
-  const seconds = Math.floor((now.getTime() - then.getTime()) / 1000);
-
-  if (seconds < 60) return 'just now';
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
-  return then.toLocaleDateString();
+function getTemperatureLabel(score: number) {
+  if (score >= 50) return 'Hot';
+  if (score >= 20) return 'Warm';
+  return 'Cold';
 }
 
-export default function LeadCard({ lead, report }: LeadCardProps) {
+export default function LeadCard({ lead }: LeadCardProps) {
   const truncateText = (text: string, maxLength: number) => {
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   };
 
+  const initials = (lead.contact_name || 'U').split(' ').map(n => n[0]).join('').toUpperCase();
+
   return (
     <Link href={`/lead/${lead.id}`}>
-      <div className="card group cursor-pointer hover:border-sb-orange transition-all duration-300">
-        {/* Header with Company Name */}
-        <div className="mb-4">
-          <h3 className="text-lg font-bold text-sb-text group-hover:text-sb-orange transition">
-            {lead.company}
-          </h3>
-          <p className="text-sm text-sb-text-secondary mt-1">
-            {lead.contact_name}
-            {lead.job_title && ` • ${lead.job_title}`}
-          </p>
+      <div className="bg-sb-card rounded-xl p-6 cursor-pointer transition-all duration-300 hover:shadow-card-hover hover:shadow-orange-100" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+
+        {/* Top Row: Avatar + Company + Score Ring */}
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div className="flex items-start gap-3 flex-1">
+            {/* Avatar */}
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sb-orange to-sb-orange-light flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-semibold text-sm">{initials}</span>
+            </div>
+
+            {/* Company + Contact Info */}
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-[15px] text-sb-text leading-tight">
+                {lead.company}
+              </h3>
+              <p className="text-[13px] text-sb-text-secondary mt-0.5 truncate">
+                {lead.contact_name}
+                {lead.job_title && ` • ${lead.job_title}`}
+              </p>
+            </div>
+          </div>
+
+          {/* Score Ring */}
+          <div className={`w-9 h-9 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${getScoreRingColor(lead.lead_score)}`}>
+            <span className="text-xs font-bold text-sb-text">{lead.lead_score}</span>
+          </div>
         </div>
 
-        {/* Use Case Badge */}
-        <div className="mb-4">
-          <span className="inline-block bg-sb-orange text-sb-bg px-3 py-1 rounded-full text-xs font-semibold">
-            {truncateText(lead.use_case, 30)}
+        {/* Pills Row */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium border ${getTemperaturePillColor(lead.lead_score)}`}>
+            {getTemperatureLabel(lead.lead_score)}
           </span>
-        </div>
-
-        {/* Timeline and Lead Score Row */}
-        <div className="flex items-center justify-between mb-4">
+          {lead.use_case && (
+            <span className="inline-flex px-2.5 py-1 bg-sb-surface text-sb-text-tertiary rounded-full text-xs font-medium border border-sb-border">
+              {truncateText(lead.use_case, 20)}
+            </span>
+          )}
           {lead.timeline && (
-            <span className="badge badge-secondary text-xs">
+            <span className="inline-flex px-2.5 py-1 bg-sb-surface text-sb-text-tertiary rounded-full text-xs font-medium border border-sb-border">
               {lead.timeline}
             </span>
           )}
-          <div className={`badge ${getScoreBadgeColor(lead.lead_score)} text-white font-bold text-xs`}>
-            Score: {lead.lead_score}
-          </div>
         </div>
 
-        {/* Opportunity Score (if report exists) */}
-        {report?.opportunity_score !== null && report?.opportunity_score !== undefined && (
-          <div className="bg-sb-card/50 border border-sb-orange/30 rounded-lg p-3 mb-4">
-            <p className="text-xs text-sb-text-secondary mb-1">Opportunity Score</p>
-            <p className="text-3xl font-bold text-sb-orange">
-              {report.opportunity_score}
-              <span className="text-lg text-sb-text-secondary">/100</span>
-            </p>
-          </div>
+        {/* Description - 2 lines clamped */}
+        {lead.tell_us_more && (
+          <p className="text-[13px] text-sb-text-secondary mb-4 line-clamp-2 leading-relaxed">
+            {lead.tell_us_more}
+          </p>
         )}
 
-        {/* Status Badge */}
-        <div className="flex items-center justify-between">
-          <span
-            className={`badge ${getStatusBadgeColor(lead.status)} text-xs font-semibold`}
-          >
-            {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
-          </span>
-          <span className="text-xs text-sb-text-secondary">
-            {getRelativeTime(lead.created_at)}
-          </span>
+        {/* Bottom Metadata - 3 column grid */}
+        <div className="border-t border-sb-border pt-3 grid grid-cols-3 gap-2 text-[12px]">
+          <div className="text-center">
+            <p className="text-sb-text-tertiary font-medium uppercase">Timeline</p>
+            <p className="text-sb-text-secondary mt-0.5">{lead.timeline || '—'}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-sb-text-tertiary font-medium uppercase">Score</p>
+            <p className="text-sb-text-secondary mt-0.5">{lead.lead_score}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-sb-text-tertiary font-medium uppercase">State</p>
+            <p className="text-sb-text-secondary mt-0.5">{lead.state || '—'}</p>
+          </div>
         </div>
-
-        {/* View Report Link */}
-        {lead.status === 'complete' && (
-          <div className="mt-4 pt-4 border-t border-sb-border">
-            <p className="text-sb-orange text-sm font-semibold flex items-center gap-2">
-              View Report
-              <span className="group-hover:translate-x-1 transition">→</span>
-            </p>
-          </div>
-        )}
       </div>
     </Link>
   );

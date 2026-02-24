@@ -25,7 +25,7 @@ function ReportSkeleton() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           {[1, 2].map((i) => (
-            <div key={i} className="card">
+            <div key={i} className="bg-sb-card rounded-xl p-6" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
               <div className="h-6 bg-sb-border rounded w-48 mb-4" />
               <div className="space-y-2">
                 <div className="h-4 bg-sb-border rounded w-full" />
@@ -36,7 +36,7 @@ function ReportSkeleton() {
           ))}
         </div>
         <div className="space-y-6">
-          <div className="card">
+          <div className="bg-sb-card rounded-xl p-6" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
             <div className="h-6 bg-sb-border rounded w-32 mb-4" />
             <div className="h-24 bg-sb-border rounded" />
           </div>
@@ -55,7 +55,7 @@ function ProcessingBanner({ status }: { status: string }) {
   };
 
   return (
-    <div className="bg-sb-card border border-sb-orange/30 rounded-lg p-6 my-8 flex items-center gap-4">
+    <div className="bg-sb-card border border-sb-orange/30 rounded-xl p-6 my-8 flex items-center gap-4" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
       <div className="h-8 w-8 border-2 border-sb-orange border-t-transparent rounded-full animate-spin flex-shrink-0" />
       <div>
         <p className="text-sb-text font-medium">
@@ -193,14 +193,14 @@ export default function LeadReportPage({ params }: { params: { id: string } }) {
   // ─── Loading State ─────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen bg-sb-bg">
+      <div className="min-h-screen bg-sb-bg text-sb-text">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
           <Link href="/" className="text-sb-orange hover:text-sb-orange/80 mb-8 inline-block">
             ← Back to Dashboard
           </Link>
           {/* Skeleton header */}
           <div className="animate-pulse">
-            <div className="card">
+            <div className="bg-sb-card rounded-xl p-6" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
               <div className="flex items-start gap-4">
                 <div className="h-16 w-16 bg-sb-border rounded-lg" />
                 <div className="flex-1 space-y-3">
@@ -219,7 +219,7 @@ export default function LeadReportPage({ params }: { params: { id: string } }) {
 
   if (!lead) {
     return (
-      <div className="min-h-screen bg-sb-bg">
+      <div className="min-h-screen bg-sb-bg text-sb-text">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-24">
           <Link href="/" className="text-sb-orange hover:text-sb-orange/80 mb-8 inline-block">
             ← Back to Dashboard
@@ -298,12 +298,12 @@ export default function LeadReportPage({ params }: { params: { id: string } }) {
 
         {/* Invalid Lead Message */}
         {isInvalid && (
-          <div className="bg-red-900/20 border border-red-700/40 rounded-lg p-6 my-8">
-            <h3 className="text-red-400 font-bold mb-2">Lead Marked Invalid</h3>
+          <div className="bg-sb-error/10 border border-sb-error/30 rounded-xl p-6 my-8">
+            <h3 className="text-sb-error font-bold mb-2">Lead Marked Invalid</h3>
             {lead.validation_errors ? (
-              <p className="text-red-300/80 text-sm">{lead.validation_errors}</p>
+              <p className="text-sb-error/80 text-sm">{lead.validation_errors}</p>
             ) : (
-              <p className="text-red-300/80 text-sm">
+              <p className="text-sb-error/80 text-sm">
                 This lead did not pass validation. You can override this by clicking &ldquo;Mark as Valid&rdquo; above.
               </p>
             )}
@@ -315,7 +315,7 @@ export default function LeadReportPage({ params }: { params: { id: string } }) {
 
         {/* Lead Description */}
         {lead.tell_us_more && (
-          <div className="card my-8">
+          <div className="bg-sb-card rounded-xl shadow-card p-6 my-8" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
             <h2 className="text-xl font-bold text-sb-orange mb-3">Lead Description</h2>
             <p className="text-sb-text-secondary leading-relaxed">{lead.tell_us_more}</p>
           </div>
@@ -323,7 +323,7 @@ export default function LeadReportPage({ params }: { params: { id: string } }) {
 
         {/* Main Report Content */}
         {!report && !isProcessing && !isInvalid ? (
-          <div className="bg-sb-card border border-sb-border rounded-lg p-8 my-8 text-center">
+          <div className="bg-sb-card border border-sb-border rounded-xl p-8 my-8 text-center" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
             <p className="text-sb-text-secondary mb-2">No report generated yet.</p>
             <button
               onClick={handleReprocess}
@@ -341,7 +341,7 @@ export default function LeadReportPage({ params }: { params: { id: string } }) {
               <div className="lg:col-span-2 space-y-6">
                 {/* Company Summary */}
                 {report.company_summary && (
-                  <div className="card">
+                  <div className="bg-sb-card rounded-xl shadow-card p-6" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                     <h2 className="text-xl font-bold text-sb-orange mb-4">
                       Company Summary
                     </h2>
@@ -353,7 +353,7 @@ export default function LeadReportPage({ params }: { params: { id: string } }) {
 
                 {/* Use Case Analysis */}
                 {report.use_case_analysis && (
-                  <div className="card">
+                  <div className="bg-sb-card rounded-xl shadow-card p-6" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                     <h2 className="text-xl font-bold text-sb-orange mb-4">
                       Use Case Analysis
                     </h2>
@@ -365,7 +365,7 @@ export default function LeadReportPage({ params }: { params: { id: string } }) {
 
                 {/* Recent News — structured rendering */}
                 {report.recent_news && (
-                  <div className="card">
+                  <div className="bg-sb-card rounded-xl shadow-card p-6" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                     <h2 className="text-xl font-bold text-sb-orange mb-4">
                       Recent News & Events
                     </h2>
@@ -398,7 +398,7 @@ export default function LeadReportPage({ params }: { params: { id: string } }) {
 
                 {/* Competitor Context */}
                 {report.competitor_context && (
-                  <div className="card">
+                  <div className="bg-sb-card rounded-xl shadow-card p-6" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                     <h2 className="text-xl font-bold text-sb-orange mb-4">
                       Competitive Landscape
                     </h2>
@@ -414,7 +414,7 @@ export default function LeadReportPage({ params }: { params: { id: string } }) {
                 <RobotRecommendation report={report} />
 
                 {/* Quick Lead Info */}
-                <div className="card">
+                <div className="bg-sb-card rounded-xl shadow-card p-6" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                   <h3 className="text-lg font-bold text-sb-orange mb-3">Lead Details</h3>
                   <div className="space-y-2 text-sm">
                     {lead.contact_name && (
@@ -478,7 +478,7 @@ export default function LeadReportPage({ params }: { params: { id: string } }) {
 
             {/* Sources */}
             {sources.length > 0 && (
-              <div className="card my-8">
+              <div className="bg-sb-card rounded-xl shadow-card p-6 my-8" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                 <h2 className="text-xl font-bold text-sb-orange mb-4">
                   Research Sources
                 </h2>

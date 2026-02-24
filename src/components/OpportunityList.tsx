@@ -69,7 +69,7 @@ export default function OpportunityList({ report }: OpportunityListProps) {
           return (
             <div
               key={idx}
-              className="card border-l-4 border-l-sb-orange hover:border-b-4 hover:border-b-sb-orange transition"
+              className="bg-sb-card rounded-xl shadow-card p-6 border-l-4 border-l-sb-orange hover:shadow-card-hover transition" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
             >
               <div className="flex items-start gap-4">
                 <IconComponent
