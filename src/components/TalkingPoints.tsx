@@ -11,62 +11,31 @@ interface TalkingPointsProps {
   report: Report;
 }
 
-interface TalkingPoint {
-  topic?: string;
-  title?: string;
-  detail?: string;
-  description?: string;
-  question?: string;
-  suggestedQuestion?: string;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function safeParseArray(val: string | null | undefined): any[] {
+  if (!val) return [];
+  try {
+    const parsed = typeof val === 'string' ? JSON.parse(val) : val;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
 }
 
-interface RoiAngle {
-  text?: string;
-  description?: string;
-}
-
-interface RiskFactor {
-  text?: string;
-  description?: string;
+// Extract the primary text from an object with varying key names
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractText(item: any, ...keys: string[]): string {
+  if (typeof item === 'string') return item;
+  for (const k of keys) {
+    if (item[k] && typeof item[k] === 'string') return item[k];
+  }
+  return '';
 }
 
 export default function TalkingPoints({ report }: TalkingPointsProps) {
-  let talkingPoints: TalkingPoint[] = [];
-  let roiAngles: RoiAngle[] = [];
-  let riskFactors: RiskFactor[] = [];
-
-  // Parse talking points
-  if (typeof report.talking_points === 'string') {
-    try {
-      talkingPoints = JSON.parse(report.talking_points);
-    } catch {
-      talkingPoints = [];
-    }
-  } else if (Array.isArray(report.talking_points)) {
-    talkingPoints = report.talking_points;
-  }
-
-  // Parse ROI angles
-  if (typeof report.roi_angles === 'string') {
-    try {
-      roiAngles = JSON.parse(report.roi_angles);
-    } catch {
-      roiAngles = [];
-    }
-  } else if (Array.isArray(report.roi_angles)) {
-    roiAngles = report.roi_angles;
-  }
-
-  // Parse risk factors
-  if (typeof report.risk_factors === 'string') {
-    try {
-      riskFactors = JSON.parse(report.risk_factors);
-    } catch {
-      riskFactors = [];
-    }
-  } else if (Array.isArray(report.risk_factors)) {
-    riskFactors = report.risk_factors;
-  }
+  const talkingPoints = safeParseArray(report.talking_points);
+  const roiAngles = safeParseArray(report.roi_angles);
+  const riskFactors = safeParseArray(report.risk_factors);
 
   return (
     <div className="space-y-8">
@@ -79,10 +48,10 @@ export default function TalkingPoints({ report }: TalkingPointsProps) {
           </h2>
 
           <div className="space-y-6">
-            {talkingPoints.map((point: TalkingPoint, idx: number) => {
-              const topic = typeof point === 'string' ? point : point.topic || point.title || '';
-              const detail = point.detail || point.description || '';
-              const question = point.question || point.suggestedQuestion || '';
+            {talkingPoints.map((point, idx: number) => {
+              const topic = extractText(point, 'topic', 'title', 'name');
+              const detail = extractText(point, 'detail', 'description', 'explanation', 'text');
+              const question = extractText(point, 'question', 'suggestedQuestion', 'suggested_question');
 
               return (
                 <div key={idx} className="border-l-4 border-l-sb-orange pl-4">
@@ -120,15 +89,21 @@ export default function TalkingPoints({ report }: TalkingPointsProps) {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {roiAngles.map((angle: RoiAngle, idx: number) => {
-              const text = typeof angle === 'string' ? angle : angle.text || angle.description || '';
+            {roiAngles.map((angle, idx: number) => {
+              const title = extractText(angle, 'angle', 'title', 'name', 'text');
+              const detail = extractText(angle, 'explanation', 'description', 'detail', 'text');
+              // If title and detail are the same (single-field item), just show one
+              const showTitle = title && title !== detail;
 
               return (
                 <div
                   key={idx}
                   className="bg-sb-bg border border-sb-orange/30 rounded-lg p-4"
                 >
-                  <p className="text-sm text-sb-text-secondary">{text}</p>
+                  {showTitle && (
+                    <p className="text-sm font-semibold text-sb-text mb-1">{title}</p>
+                  )}
+                  <p className="text-sm text-sb-text-secondary">{detail || title}</p>
                 </div>
               );
             })}
@@ -145,8 +120,9 @@ export default function TalkingPoints({ report }: TalkingPointsProps) {
           </h2>
 
           <div className="space-y-3">
-            {riskFactors.map((risk: RiskFactor, idx: number) => {
-              const text = typeof risk === 'string' ? risk : risk.text || risk.description || '';
+            {riskFactors.map((risk, idx: number) => {
+              const title = extractText(risk, 'risk', 'title', 'name', 'text');
+              const detail = extractText(risk, 'mitigation', 'description', 'detail', 'explanation');
 
               return (
                 <div
@@ -154,7 +130,15 @@ export default function TalkingPoints({ report }: TalkingPointsProps) {
                   className="flex items-start gap-3 p-3 bg-sb-bg/50 border-l-4 border-l-sb-error rounded"
                 >
                   <span className="text-sb-error mt-1">•</span>
-                  <p className="text-sm text-sb-text-secondary">{text}</p>
+                  <div className="flex-1">
+                    {title && <p className="text-sm font-semibold text-sb-text mb-1">{title}</p>}
+                    {detail && detail !== title && (
+                      <p className="text-sm text-sb-text-secondary">{detail}</p>
+                    )}
+                    {!detail && !title && (
+                      <p className="text-sm text-sb-text-secondary">{typeof risk === 'string' ? risk : JSON.stringify(risk)}</p>
+                    )}
+                  </div>
                 </div>
               );
             })}
