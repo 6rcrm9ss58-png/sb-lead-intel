@@ -26,6 +26,7 @@ export default function Dashboard() {
   const [filteredLeads, setFilteredLeads] = useState<LeadWithReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<FilterId>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Get the effective score for a lead (opportunity_score from report, or lead_score fallback)
   const getScore = (lead: LeadWithReport) => lead.report?.opportunity_score ?? lead.lead_score;
@@ -33,6 +34,27 @@ export default function Dashboard() {
   const applyFilters = useCallback(() => {
     let filtered = leads;
 
+    // Apply search query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((lead) => {
+        const fields = [
+          lead.company,
+          lead.contact_name,
+          lead.job_title,
+          lead.email,
+          lead.use_case,
+          lead.state,
+          lead.country,
+          lead.lead_source,
+          lead.tell_us_more,
+          lead.report?.recommended_robot,
+        ];
+        return fields.some((f) => f && f.toLowerCase().includes(q));
+      });
+    }
+
+    // Apply category filter
     if (activeFilter === 'hot') {
       filtered = filtered.filter((lead) => getScore(lead) >= 85);
     } else if (activeFilter === 'warm') {
@@ -54,7 +76,7 @@ export default function Dashboard() {
     }
 
     setFilteredLeads(filtered);
-  }, [leads, activeFilter]);
+  }, [leads, activeFilter, searchQuery]);
 
   useEffect(() => {
     fetchLeads();
@@ -189,17 +211,60 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Filter Row */}
-          <div className="flex flex-wrap gap-2 mb-8">
-            {filters.map((filter) => (
-              <button
-                key={filter.id}
-                onClick={() => setActiveFilter(filter.id)}
-                className={`filter-btn ${activeFilter === filter.id ? 'active' : ''}`}
+          {/* Search + Filter Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8">
+            <div className="relative flex-shrink-0" style={{ width: 300 }}>
+              <svg
+                style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--sb-text-tertiary)' }}
+                width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
               >
-                {filter.label}
-              </button>
-            ))}
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search leads..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px 8px 36px',
+                  fontSize: 14,
+                  border: '1px solid var(--sb-border)',
+                  borderRadius: 8,
+                  backgroundColor: 'white',
+                  color: 'var(--sb-text)',
+                  outline: 'none',
+                  transition: 'border-color 0.15s',
+                }}
+                onFocus={(e) => (e.target.style.borderColor = 'var(--sb-orange)')}
+                onBlur={(e) => (e.target.style.borderColor = 'var(--sb-border)')}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  style={{
+                    position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', cursor: 'pointer', color: 'var(--sb-text-tertiary)',
+                    fontSize: 16, lineHeight: 1, padding: 4,
+                  }}
+                  aria-label="Clear search"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {filters.map((filter) => (
+                <button
+                  key={filter.id}
+                  onClick={() => setActiveFilter(filter.id)}
+                  className={`filter-btn ${activeFilter === filter.id ? 'active' : ''}`}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Lead Grid */}
@@ -210,7 +275,7 @@ export default function Dashboard() {
           ) : filteredLeads.length === 0 ? (
             <div className="flex items-center justify-center py-12">
               <p className="text-sb-text-secondary text-center">
-                {activeFilter !== 'all' ? 'No leads match this filter' : 'No leads yet. Waiting for data...'}
+                {searchQuery ? `No leads match "${searchQuery}"` : activeFilter !== 'all' ? 'No leads match this filter' : 'No leads yet. Waiting for data...'}
               </p>
             </div>
           ) : (
