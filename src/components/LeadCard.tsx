@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import { Database } from '@/types/supabase';
 
@@ -32,10 +35,69 @@ function getTemperaturePillStyle(score: number): React.CSSProperties {
   return { background: 'rgba(239,68,68,0.08)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' };
 }
 
+/**
+ * Extract a clean domain from a website URL for logo lookup.
+ * e.g. "https://www.americanbox.com/contact" → "americanbox.com"
+ */
+function extractDomain(website: string | null): string | null {
+  if (!website) return null;
+  try {
+    let url = website.trim();
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+    const hostname = new URL(url).hostname;
+    // Strip leading "www."
+    return hostname.replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+}
+
+function CompanyAvatar({ lead }: { lead: Lead }) {
+  const [logoFailed, setLogoFailed] = useState(false);
+  const domain = extractDomain(lead.website);
+  const initials = (lead.company || 'U').split(/[\s&]+/).map(w => w[0]).filter(Boolean).join('').toUpperCase().slice(0, 2);
+
+  const logoUrl = domain ? `https://logo.clearbit.com/${domain}?size=80` : null;
+
+  // Show logo if we have a domain and it hasn't failed to load
+  if (logoUrl && !logoFailed) {
+    return (
+      <div style={{
+        width: 40, height: 40, borderRadius: '50%',
+        overflow: 'hidden', flexShrink: 0,
+        background: '#F5F5F7',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={logoUrl}
+          alt={`${lead.company} logo`}
+          width={40}
+          height={40}
+          style={{ objectFit: 'contain', width: 40, height: 40 }}
+          onError={() => setLogoFailed(true)}
+        />
+      </div>
+    );
+  }
+
+  // Fallback: orange gradient circle with initials
+  return (
+    <div style={{
+      width: 40, height: 40, borderRadius: '50%',
+      background: 'linear-gradient(135deg, #FF6A00, #FF8533)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+    }}>
+      <span style={{ color: '#FFF', fontWeight: 600, fontSize: 13 }}>{initials}</span>
+    </div>
+  );
+}
+
 export default function LeadCard({ lead, report, sourcesCount = 0 }: LeadCardProps) {
   const score = getScore(lead, report);
   const scoreColor = getScoreColor(score);
-  const initials = (lead.contact_name || 'U').split(' ').map(n => n[0]).join('').toUpperCase();
 
   // Use company_summary from report if available, otherwise tell_us_more
   const description = report?.company_summary || lead.tell_us_more || '';
@@ -48,14 +110,8 @@ export default function LeadCard({ lead, report, sourcesCount = 0 }: LeadCardPro
         {/* Top Row: Avatar + Company/Contact + Score Ring */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 12 }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, flex: 1, minWidth: 0 }}>
-            {/* Avatar Circle */}
-            <div style={{
-              width: 40, height: 40, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #FF6A00, #FF8533)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-            }}>
-              <span style={{ color: '#FFF', fontWeight: 600, fontSize: 13 }}>{initials}</span>
-            </div>
+            {/* Company Logo or Initials Avatar */}
+            <CompanyAvatar lead={lead} />
 
             {/* Company + Contact */}
             <div style={{ flex: 1, minWidth: 0 }}>
