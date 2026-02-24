@@ -18,20 +18,20 @@ function getScore(lead: Lead, report?: Report | null): number {
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 85) return '#22C55E';
-  if (score >= 70) return '#FF6A00';
+  if (score > 80) return '#22C55E';
+  if (score > 50) return '#FF6A00';
   return '#EF4444';
 }
 
 function getTemperatureLabel(score: number): string {
-  if (score >= 85) return 'Hot';
-  if (score >= 70) return 'Warm';
+  if (score > 80) return 'Hot';
+  if (score > 50) return 'Warm';
   return 'Cold';
 }
 
 function getTemperaturePillStyle(score: number): React.CSSProperties {
-  if (score >= 85) return { background: 'rgba(34,197,94,0.08)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.2)' };
-  if (score >= 70) return { background: 'rgba(255,106,0,0.08)', color: '#FF6A00', border: '1px solid rgba(255,106,0,0.2)' };
+  if (score > 80) return { background: 'rgba(34,197,94,0.08)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.2)' };
+  if (score > 50) return { background: 'rgba(255,106,0,0.08)', color: '#FF6A00', border: '1px solid rgba(255,106,0,0.2)' };
   return { background: 'rgba(239,68,68,0.08)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' };
 }
 
@@ -193,10 +193,8 @@ export default function LeadCard({ lead, report, sourcesCount = 0 }: LeadCardPro
           display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8,
         }}>
           <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--sb-text-tertiary)', marginBottom: 2 }}>Submitted</p>
-            <p style={{ fontSize: 12, color: 'var(--sb-text-secondary)', marginBottom: 0 }}>
-              {new Date(lead.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-            </p>
+            <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--sb-text-tertiary)', marginBottom: 2 }}>Timeline</p>
+            <p style={{ fontSize: 12, color: 'var(--sb-text-secondary)', marginBottom: 0 }}>{lead.timeline || '—'}</p>
           </div>
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--sb-text-tertiary)', marginBottom: 2 }}>Confidence</p>

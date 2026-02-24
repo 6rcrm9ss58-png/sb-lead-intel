@@ -56,14 +56,14 @@ export default function Dashboard() {
 
     // Apply category filter
     if (activeFilter === 'hot') {
-      filtered = filtered.filter((lead) => getScore(lead) >= 85);
+      filtered = filtered.filter((lead) => getScore(lead) > 80);
     } else if (activeFilter === 'warm') {
       filtered = filtered.filter((lead) => {
         const s = getScore(lead);
-        return s >= 70 && s < 85;
+        return s > 50 && s <= 80;
       });
     } else if (activeFilter === 'cold') {
-      filtered = filtered.filter((lead) => getScore(lead) < 70);
+      filtered = filtered.filter((lead) => getScore(lead) <= 50);
     } else if (activeFilter === 'thor') {
       filtered = filtered.filter((lead) => lead.report?.recommended_robot?.toLowerCase().includes('thor'));
     } else if (activeFilter === 'core') {
@@ -141,15 +141,15 @@ export default function Dashboard() {
 
   // Calculate stats using opportunity_score where available
   const scores = leads.map((l) => getScore(l));
-  const hotLeads = scores.filter((s) => s >= 85).length;
+  const hotLeads = scores.filter((s) => s > 80).length;
   const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
   const totalSources = leads.reduce((sum, l) => sum + (l.sources_count || 0), 0);
 
   const filters: { id: FilterId; label: string }[] = [
     { id: 'all', label: 'All Leads' },
-    { id: 'hot', label: 'Hot 85+' },
-    { id: 'warm', label: 'Warm 70-84' },
-    { id: 'cold', label: 'Cold <70' },
+    { id: 'hot', label: 'Hot 80+' },
+    { id: 'warm', label: 'Warm 51-80' },
+    { id: 'cold', label: 'Cold ≤50' },
     { id: 'thor', label: 'Thor' },
     { id: 'core', label: 'Core/RO1' },
     { id: 'spark', label: 'Spark' },
@@ -189,7 +189,7 @@ export default function Dashboard() {
               <p style={{ fontSize: 28, fontWeight: 700, color: 'var(--sb-success)', lineHeight: 1.1, marginBottom: 2 }}>
                 {hotLeads}
               </p>
-              <p style={{ fontSize: 12, color: 'var(--sb-text-tertiary)', marginBottom: 0 }}>score ≥ 85</p>
+              <p style={{ fontSize: 12, color: 'var(--sb-text-tertiary)', marginBottom: 0 }}>score > 80</p>
             </div>
             <div className="section-card" style={{ marginBottom: 0 }}>
               <p style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--sb-text-secondary)', marginBottom: 6 }}>
