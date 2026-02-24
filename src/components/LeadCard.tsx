@@ -95,6 +95,22 @@ function CompanyAvatar({ lead }: { lead: Lead }) {
   );
 }
 
+function formatSubmittedDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined });
+}
+
 export default function LeadCard({ lead, report, sourcesCount = 0 }: LeadCardProps) {
   const score = getScore(lead, report);
   const scoreColor = getScoreColor(score);
@@ -118,9 +134,12 @@ export default function LeadCard({ lead, report, sourcesCount = 0 }: LeadCardPro
               <h3 style={{ fontSize: 15, fontWeight: 600, color: 'var(--sb-text)', lineHeight: 1.3, marginBottom: 2 }}>
                 {lead.company}
               </h3>
-              <p style={{ fontSize: 13, color: 'var(--sb-text-secondary)', marginBottom: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <p style={{ fontSize: 13, color: 'var(--sb-text-secondary)', marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {lead.contact_name}
                 {lead.job_title && ` · ${lead.job_title}`}
+              </p>
+              <p style={{ fontSize: 11, color: 'var(--sb-text-tertiary)', marginBottom: 0 }}>
+                {formatSubmittedDate(lead.created_at)}
               </p>
             </div>
           </div>
@@ -174,8 +193,10 @@ export default function LeadCard({ lead, report, sourcesCount = 0 }: LeadCardPro
           display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8,
         }}>
           <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--sb-text-tertiary)', marginBottom: 2 }}>Timeline</p>
-            <p style={{ fontSize: 12, color: 'var(--sb-text-secondary)', marginBottom: 0 }}>{lead.timeline || '—'}</p>
+            <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--sb-text-tertiary)', marginBottom: 2 }}>Submitted</p>
+            <p style={{ fontSize: 12, color: 'var(--sb-text-secondary)', marginBottom: 0 }}>
+              {new Date(lead.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </p>
           </div>
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--sb-text-tertiary)', marginBottom: 2 }}>Confidence</p>
