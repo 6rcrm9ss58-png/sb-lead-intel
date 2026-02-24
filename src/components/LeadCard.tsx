@@ -6,101 +6,128 @@ type Report = Database['public']['Tables']['reports']['Row'];
 
 interface LeadCardProps {
   lead: Lead;
-  report?: Report;
+  report?: Report | null;
+  sourcesCount?: number;
 }
 
-function getScoreRingColor(score: number) {
-  if (score >= 50) return 'border-sb-success';
-  if (score >= 20) return 'border-sb-orange';
-  return 'border-sb-error';
+function getScore(lead: Lead, report?: Report | null): number {
+  return report?.opportunity_score ?? lead.lead_score;
 }
 
-function getTemperaturePillColor(score: number) {
-  if (score >= 50) return 'bg-sb-success/10 text-sb-success border-sb-success/30';
-  if (score >= 20) return 'bg-sb-orange/10 text-sb-orange border-sb-orange/30';
-  return 'bg-sb-error/10 text-sb-error border-sb-error/30';
+function getScoreColor(score: number): string {
+  if (score >= 85) return '#22C55E';
+  if (score >= 70) return '#FF6A00';
+  return '#EF4444';
 }
 
-function getTemperatureLabel(score: number) {
-  if (score >= 50) return 'Hot';
-  if (score >= 20) return 'Warm';
+function getTemperatureLabel(score: number): string {
+  if (score >= 85) return 'Hot';
+  if (score >= 70) return 'Warm';
   return 'Cold';
 }
 
-export default function LeadCard({ lead }: LeadCardProps) {
-  const truncateText = (text: string, maxLength: number) => {
-    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-  };
+function getTemperaturePillStyle(score: number): React.CSSProperties {
+  if (score >= 85) return { background: 'rgba(34,197,94,0.08)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.2)' };
+  if (score >= 70) return { background: 'rgba(255,106,0,0.08)', color: '#FF6A00', border: '1px solid rgba(255,106,0,0.2)' };
+  return { background: 'rgba(239,68,68,0.08)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' };
+}
 
+export default function LeadCard({ lead, report, sourcesCount = 0 }: LeadCardProps) {
+  const score = getScore(lead, report);
+  const scoreColor = getScoreColor(score);
   const initials = (lead.contact_name || 'U').split(' ').map(n => n[0]).join('').toUpperCase();
+
+  // Use company_summary from report if available, otherwise tell_us_more
+  const description = report?.company_summary || lead.tell_us_more || '';
+  const confidence = report?.recommendation_confidence;
+  const robot = report?.recommended_robot;
 
   return (
     <Link href={`/lead/${lead.id}`}>
-      <div className="bg-sb-card rounded-xl p-6 cursor-pointer transition-all duration-300 hover:shadow-card-hover hover:shadow-orange-100" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-
-        {/* Top Row: Avatar + Company + Score Ring */}
-        <div className="flex items-start justify-between gap-4 mb-4">
-          <div className="flex items-start gap-3 flex-1">
-            {/* Avatar */}
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sb-orange to-sb-orange-light flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-semibold text-sm">{initials}</span>
+      <div className="card" style={{ padding: 20 }}>
+        {/* Top Row: Avatar + Company/Contact + Score Ring */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, flex: 1, minWidth: 0 }}>
+            {/* Avatar Circle */}
+            <div style={{
+              width: 40, height: 40, borderRadius: '50%',
+              background: 'linear-gradient(135deg, #FF6A00, #FF8533)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            }}>
+              <span style={{ color: '#FFF', fontWeight: 600, fontSize: 13 }}>{initials}</span>
             </div>
 
-            {/* Company + Contact Info */}
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-[15px] text-sb-text leading-tight">
+            {/* Company + Contact */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 600, color: 'var(--sb-text)', lineHeight: 1.3, marginBottom: 2 }}>
                 {lead.company}
               </h3>
-              <p className="text-[13px] text-sb-text-secondary mt-0.5 truncate">
+              <p style={{ fontSize: 13, color: 'var(--sb-text-secondary)', marginBottom: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {lead.contact_name}
-                {lead.job_title && ` • ${lead.job_title}`}
+                {lead.job_title && ` · ${lead.job_title}`}
               </p>
             </div>
           </div>
 
           {/* Score Ring */}
-          <div className={`w-9 h-9 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${getScoreRingColor(lead.lead_score)}`}>
-            <span className="text-xs font-bold text-sb-text">{lead.lead_score}</span>
+          <div style={{
+            width: 36, height: 36, borderRadius: '50%',
+            border: `3px solid ${scoreColor}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--sb-text)' }}>{score}</span>
           </div>
         </div>
 
         {/* Pills Row */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium border ${getTemperaturePillColor(lead.lead_score)}`}>
-            {getTemperatureLabel(lead.lead_score)}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+          {/* Temperature Pill */}
+          <span className="badge" style={{ ...getTemperaturePillStyle(score), padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 500 }}>
+            {getTemperatureLabel(score)}
           </span>
+
+          {/* Use Case Pill */}
           {lead.use_case && (
-            <span className="inline-flex px-2.5 py-1 bg-sb-surface text-sb-text-tertiary rounded-full text-xs font-medium border border-sb-border">
-              {truncateText(lead.use_case, 20)}
+            <span className="pill">
+              {lead.use_case.length > 22 ? lead.use_case.substring(0, 22) + '…' : lead.use_case}
             </span>
           )}
-          {lead.timeline && (
-            <span className="inline-flex px-2.5 py-1 bg-sb-surface text-sb-text-tertiary rounded-full text-xs font-medium border border-sb-border">
-              {lead.timeline}
+
+          {/* Robot Pill */}
+          {robot && (
+            <span className="pill" style={{ background: 'rgba(255,106,0,0.06)', color: '#FF6A00', borderColor: 'rgba(255,106,0,0.15)' }}>
+              {robot}
             </span>
           )}
         </div>
 
         {/* Description - 2 lines clamped */}
-        {lead.tell_us_more && (
-          <p className="text-[13px] text-sb-text-secondary mb-4 line-clamp-2 leading-relaxed">
-            {lead.tell_us_more}
+        {description && (
+          <p style={{
+            fontSize: 13, color: 'var(--sb-text-secondary)', lineHeight: 1.5,
+            marginBottom: 12,
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+          }}>
+            {description}
           </p>
         )}
 
         {/* Bottom Metadata - 3 column grid */}
-        <div className="border-t border-sb-border pt-3 grid grid-cols-3 gap-2 text-[12px]">
-          <div className="text-center">
-            <p className="text-sb-text-tertiary font-medium uppercase">Timeline</p>
-            <p className="text-sb-text-secondary mt-0.5">{lead.timeline || '—'}</p>
+        <div style={{
+          borderTop: '1px solid var(--sb-border)', paddingTop: 10,
+          display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8,
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--sb-text-tertiary)', marginBottom: 2 }}>Timeline</p>
+            <p style={{ fontSize: 12, color: 'var(--sb-text-secondary)', marginBottom: 0 }}>{lead.timeline || '—'}</p>
           </div>
-          <div className="text-center">
-            <p className="text-sb-text-tertiary font-medium uppercase">Score</p>
-            <p className="text-sb-text-secondary mt-0.5">{lead.lead_score}</p>
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--sb-text-tertiary)', marginBottom: 2 }}>Confidence</p>
+            <p style={{ fontSize: 12, color: 'var(--sb-text-secondary)', marginBottom: 0 }}>{confidence != null ? `${confidence}%` : '—'}</p>
           </div>
-          <div className="text-center">
-            <p className="text-sb-text-tertiary font-medium uppercase">State</p>
-            <p className="text-sb-text-secondary mt-0.5">{lead.state || '—'}</p>
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--sb-text-tertiary)', marginBottom: 2 }}>Sources</p>
+            <p style={{ fontSize: 12, color: 'var(--sb-text-secondary)', marginBottom: 0 }}>{sourcesCount > 0 ? sourcesCount : '—'}</p>
           </div>
         </div>
       </div>
