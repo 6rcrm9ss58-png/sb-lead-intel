@@ -189,7 +189,7 @@ export default function Dashboard() {
               <p style={{ fontSize: 28, fontWeight: 700, color: 'var(--sb-success)', lineHeight: 1.1, marginBottom: 2 }}>
                 {hotLeads}
               </p>
-              <p style={{ fontSize: 12, color: 'var(--sb-text-tertiary)', marginBottom: 0 }}>score > 80</p>
+              <p style={{ fontSize: 12, color: 'var(--sb-text-tertiary)', marginBottom: 0 }}>score {'>'} 80</p>
             </div>
             <div className="section-card" style={{ marginBottom: 0 }}>
               <p style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--sb-text-secondary)', marginBottom: 6 }}>
