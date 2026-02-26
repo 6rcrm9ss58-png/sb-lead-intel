@@ -8,6 +8,8 @@ import CompanyHeader from '@/components/CompanyHeader';
 import RobotRecommendation from '@/components/RobotRecommendation';
 import OpportunityList from '@/components/OpportunityList';
 import TalkingPoints from '@/components/TalkingPoints';
+import HubSpotPanel from '@/components/HubSpotPanel';
+import FirefliesPanel from '@/components/FirefliesPanel';
 
 type Lead = Database['public']['Tables']['leads']['Row'];
 type Report = Database['public']['Tables']['reports']['Row'];
@@ -475,6 +477,12 @@ export default function LeadReportPage({ params }: { params: { id: string } }) {
                 <TalkingPoints report={report} />
               </div>
             )}
+
+            {/* Connected Data Sources */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 my-8">
+              <HubSpotPanel leadId={params.id} />
+              <FirefliesPanel leadId={params.id} />
+            </div>
 
             {/* Sources */}
             {sources.length > 0 && (
