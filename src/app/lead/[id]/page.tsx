@@ -10,6 +10,8 @@ import OpportunityList from '@/components/OpportunityList';
 import TalkingPoints from '@/components/TalkingPoints';
 import HubSpotPanel from '@/components/HubSpotPanel';
 import FirefliesPanel from '@/components/FirefliesPanel';
+import SalespersonSelector from '@/components/SalespersonSelector';
+import PipelineStageSelector from '@/components/PipelineStageSelector';
 
 type Lead = Database['public']['Tables']['leads']['Row'];
 type Report = Database['public']['Tables']['reports']['Row'];
@@ -413,6 +415,23 @@ export default function LeadReportPage({ params }: { params: { id: string } }) {
 
               {/* Right Column - Sidebar */}
               <div className="space-y-6">
+                {/* Salesperson Assignment */}
+                <SalespersonSelector
+                  leadId={params.id}
+                  currentAssignee={lead.assigned_to_name}
+                  currentEmail={lead.assigned_to_email}
+                  onAssigned={() => fetchData(true)}
+                />
+
+                {/* Pipeline Stage */}
+                {lead.assigned_to_name && (
+                  <PipelineStageSelector
+                    leadId={params.id}
+                    currentStage={lead.pipeline_stage}
+                    onStageChanged={() => fetchData(true)}
+                  />
+                )}
+
                 <RobotRecommendation report={report} />
 
                 {/* Quick Lead Info */}

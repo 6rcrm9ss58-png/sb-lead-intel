@@ -1,11 +1,19 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
+  const pathname = usePathname();
+
+  const links = [
+    { href: '/', label: 'Dashboard' },
+    { href: '/pipeline', label: 'Pipeline' },
+  ];
+
   return (
     <nav className="sticky top-0 z-50 h-[52px] backdrop-blur border-b border-sb-border" style={{ backgroundColor: 'rgba(250, 250, 250, 0.72)' }}>
-      <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
+      <div style={{ maxWidth: 1400 }} className="mx-auto px-4 h-full flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-bold text-lg">
           <svg width="31" height="20" viewBox="0 0 31 20" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M23.7488 0L26.3369 4.5H4.6633L7.2514 0H23.7488Z" fill="#0A0A0A"/>
@@ -15,24 +23,19 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center gap-8">
-          <Link
-            href="/"
-            className="text-sm font-medium text-sb-text hover:text-sb-orange transition-colors"
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="/"
-            className="text-sm font-medium text-sb-text-secondary hover:text-sb-orange transition-colors"
-          >
-            Pipeline
-          </Link>
-          <Link
-            href="/"
-            className="text-sm font-medium text-sb-text-secondary hover:text-sb-orange transition-colors"
-          >
-            Settings
-          </Link>
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`text-sm font-medium transition-colors ${
+                pathname === link.href
+                  ? 'text-sb-orange'
+                  : 'text-sb-text-secondary hover:text-sb-orange'
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
         </div>
       </div>
     </nav>

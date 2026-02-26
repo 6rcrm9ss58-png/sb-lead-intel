@@ -24,6 +24,11 @@ export type Database = {
           validation_errors: string | null;
           slack_event_id: string | null;
           slack_timestamp: string | null;
+          assigned_to_name: string | null;
+          assigned_to_email: string | null;
+          assigned_to_slack_id: string | null;
+          assigned_at: string | null;
+          pipeline_stage: string;
           created_at: string;
           updated_at: string;
         };
@@ -48,6 +53,11 @@ export type Database = {
           validation_errors?: string | null;
           slack_event_id?: string | null;
           slack_timestamp?: string | null;
+          assigned_to_name?: string | null;
+          assigned_to_email?: string | null;
+          assigned_to_slack_id?: string | null;
+          assigned_at?: string | null;
+          pipeline_stage?: string;
         };
         Update: {
           company?: string;
@@ -68,6 +78,11 @@ export type Database = {
           raw_message?: string;
           status?: 'pending' | 'validating' | 'researching' | 'complete' | 'invalid';
           validation_errors?: string | null;
+          assigned_to_name?: string | null;
+          assigned_to_email?: string | null;
+          assigned_to_slack_id?: string | null;
+          assigned_at?: string | null;
+          pipeline_stage?: string;
         };
         Relationships: [];
       };
