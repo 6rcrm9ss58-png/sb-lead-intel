@@ -35,8 +35,8 @@ export default function PipelineStageSelector({ leadId, currentStage, onStageCha
       });
       if (!res.ok) throw new Error('Failed to update stage');
       onStageChanged();
-    } catch (err) {
-      console.error('Stage change error:', err);
+    } catch (_err) {
+      console.error('Stage change error:', _err);
     } finally {
       setUpdating(false);
     }
@@ -84,9 +84,9 @@ export default function PipelineStageSelector({ leadId, currentStage, onStageCha
             style={{
               backgroundColor: stage.id === currentStage ? `${stage.color}20` : `${stage.color}08`,
               color: stage.color,
-              ringColor: stage.id === currentStage ? stage.color : undefined,
+              ['--tw-ring-color' as string]: stage.id === currentStage ? stage.color : undefined,
               opacity: updating ? 0.5 : stage.id === currentStage ? 1 : 0.7,
-            }}
+            } as React.CSSProperties}
           >
             {stage.label}
           </button>

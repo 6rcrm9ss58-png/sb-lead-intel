@@ -34,8 +34,8 @@ export default function SalespersonSelector({ leadId, currentAssignee, currentEm
         const res = await fetch('/api/salespeople');
         const data = await res.json();
         setSalespeople(data.salespeople || []);
-      } catch (err) {
-        console.error('Failed to fetch salespeople:', err);
+      } catch (_err) {
+        console.error('Failed to fetch salespeople:', _err);
       } finally {
         setLoading(false);
       }
@@ -92,8 +92,8 @@ export default function SalespersonSelector({ leadId, currentAssignee, currentEm
       setOpen(false);
       setSearch('');
       onAssigned();
-    } catch (err) {
-      console.error('Assignment failed:', err);
+    } catch (_err) {
+      console.error('Assignment failed:', _err);
     } finally {
       setAssigning(false);
     }
@@ -105,8 +105,8 @@ export default function SalespersonSelector({ leadId, currentAssignee, currentEm
       const res = await fetch(`/api/lead/${leadId}/assign`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to unassign');
       onAssigned();
-    } catch (err) {
-      console.error('Unassign failed:', err);
+    } catch (_err) {
+      console.error('Unassign failed:', _err);
     } finally {
       setAssigning(false);
     }

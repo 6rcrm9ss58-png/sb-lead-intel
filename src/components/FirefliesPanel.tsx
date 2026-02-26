@@ -50,7 +50,7 @@ export default function FirefliesPanel({ leadId }: { leadId: string }) {
         if (!res.ok) throw new Error('Failed to fetch');
         const json = await res.json();
         setData(json);
-      } catch (err) {
+      } catch (_err) {
         setError('fetch_failed');
       } finally {
         setLoading(false);
